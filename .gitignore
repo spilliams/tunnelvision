@@ -1,4 +1,13 @@
 bin/
+
+# some files i like to play with
+*.tf
+*.hcl
+*.tfl
+*.svg
+*.dot
+*.png
+
 # Binaries for programs and plugins
 *.exe
 *.exe~

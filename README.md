@@ -1,2 +1,5 @@
 # tunnelvision
-a half-cocked idea to extend the `terraform graph` functionality. Written in Go.
+
+How does a gopher oversee and administrate a terraforming project?
+
+(write the rest of the readme here)

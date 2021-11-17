@@ -13,10 +13,6 @@ func newRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tunnelvision",
 		Short: "A way to visualize your terraform plans",
-		// RunE: func(cmd *cobra.Command, args []string) error {
-		// 	log.Println("hello, world")
-		// 	return nil
-		// },
 	}
 
 	cmd.AddCommand(newSimpleParseCommand())
@@ -24,6 +20,7 @@ func newRootCmd() *cobra.Command {
 	return cmd
 }
 
+// Execute runs the cli in this package
 func Execute() {
 	if err := newRootCmd().Execute(); err != nil {
 		log.Println(err)

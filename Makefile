@@ -1,6 +1,6 @@
 .PHONY: build
 build:
-	go build -o bin/tunnelvision src/cmd/tunnelvision/main.go
+	go build -o bin/tv src/cmd/tunnelvision/main.go
 
 .PHONY: install
 install:

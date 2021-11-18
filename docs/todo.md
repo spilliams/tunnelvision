@@ -15,8 +15,9 @@ tunnelvision
 │   ├── show        print definition info about the backend (e.g. s3 bucket)
 │   └── search TERM search all statefiles in the backend for a term
 ├── completion      generate the autocompletion script for the specified shell
-├── help            help about any command (this command is also available at
-│                   all subcommand paths)
+├── file            commands that operate on a single file
+│   └── graph       graph a file
+├── help            help about any command
 ├── module          commands pertaining to a single terraform module
 │   └── graph       graph a terraform module
 ├── root            commands pertaining to a single terraform root

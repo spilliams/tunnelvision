@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"log"
 	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ func newRootCmd() *cobra.Command {
 // Execute runs the cli in this package
 func Execute() {
 	if err := newRootCmd().Execute(); err != nil {
-		log.Println(err)
+		log.Error(err)
 		os.Exit(1)
 	}
 }

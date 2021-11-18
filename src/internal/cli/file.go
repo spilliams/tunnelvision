@@ -1,10 +1,8 @@
 package cli
 
 import (
-	"fmt"
-
-	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/spf13/cobra"
+	"github.com/spilliams/tunnelvision/src/internal/hcl"
 )
 
 func newFileCommand() *cobra.Command {
@@ -25,11 +23,7 @@ func newParseFileCommand() *cobra.Command {
 		Short: "parse a single hcl file",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p := hclparse.NewParser()
-			file, diagnostics := p.ParseHCLFile(args[0])
-			fmt.Println(file)
-			fmt.Println(diagnostics)
-			return nil
+			return hcl.ParseHCLFile(args[0])
 		},
 	}
 }

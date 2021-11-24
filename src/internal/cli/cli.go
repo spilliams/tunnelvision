@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var verbose bool
+
 func newRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tunnelvision",
@@ -19,7 +21,21 @@ func newRootCmd() *cobra.Command {
 	cmd.AddCommand(newRootCommand())
 	// cmd.AddCommand(newStackCommand())
 
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "make log output more verbose")
+
 	return cmd
+}
+
+func init() {
+	cobra.OnInitialize(initLogger)
+}
+
+func initLogger() {
+	log.SetLevel(log.InfoLevel)
+	log.SetFormatter(&log.TextFormatter{})
+	if verbose {
+		log.SetLevel(log.DebugLevel)
+	}
 }
 
 // Execute runs the cli in this package

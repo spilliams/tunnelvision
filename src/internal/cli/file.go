@@ -1,11 +1,9 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"github.com/spilliams/tunnelvision/src/internal/grapher"
 	"github.com/spilliams/tunnelvision/src/internal/hcl"
+	"github.com/spilliams/tunnelvision/src/pkg/tfgraph"
 )
 
 func newFileCommand() *cobra.Command {
@@ -38,17 +36,7 @@ func newGraphFileCommand() *cobra.Command {
 		Short: "perform operations on a single .dot or .gv file",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			gg := grapher.NewGrapher()
-			gvLoader := grapher.NewGraphvizLoader()
-			gg.RegisterLoader("dot", gvLoader)
-			gg.RegisterLoader("gv", gvLoader)
-
-			g, err := gg.LoadGraphFromFile(args[0])
-			if err != nil {
-				return err
-			}
-			fmt.Println(g)
-			return nil
+			return tfgraph.TfGraph(args[0])
 		},
 	}
 }

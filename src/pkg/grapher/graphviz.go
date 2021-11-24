@@ -2,9 +2,10 @@ package grapher
 
 import (
 	"io/ioutil"
+	"os"
 
 	"github.com/awalterschulze/gographviz"
-	"github.com/spilliams/tunnelvision/src/internal"
+	"github.com/spilliams/tunnelvision/src/pkg"
 )
 
 type graphvizLoader struct{}
@@ -12,11 +13,11 @@ type graphvizLoader struct{}
 // NewGraphvizLoader returns a new file loader that knows how to read graphviz
 // files. It makes an assumption that the first node in the file is the root of
 // the graph
-func NewGraphvizLoader() internal.Loader {
+func NewGraphvizLoader() pkg.Loader {
 	return &graphvizLoader{}
 }
 
-func (gvl *graphvizLoader) LoadGraphFromFile(filename string) (internal.Graph, error) {
+func (gvl *graphvizLoader) LoadGraphFromFile(filename string) (pkg.Graph, error) {
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -27,4 +28,14 @@ func (gvl *graphvizLoader) LoadGraphFromFile(filename string) (internal.Graph, e
 		return nil, err
 	}
 	return graph, nil
+}
+
+type graphvizWriter struct{}
+
+func NewGraphvizWriter() pkg.GraphWriter {
+	return &graphvizWriter{}
+}
+
+func (gvw *graphvizWriter) Write(g pkg.Graph, filename string) error {
+	return os.WriteFile(filename, []byte(g.String()), 0777)
 }

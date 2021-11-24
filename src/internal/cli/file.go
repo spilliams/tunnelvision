@@ -1,6 +1,7 @@
 package cli
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spilliams/tunnelvision/src/internal/hcl"
 	"github.com/spilliams/tunnelvision/src/pkg/tfgraph"
@@ -36,7 +37,13 @@ func newGraphFileCommand() *cobra.Command {
 		Short: "perform operations on a single .dot or .gv file",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return tfgraph.TfGraph(args[0])
+			outFilename := "output.dot"
+			err := tfgraph.TfGraph(args[0], outFilename)
+			if err != nil {
+				return err
+			}
+			log.Infof("Wrote graph to %s", outFilename)
+			return nil
 		},
 	}
 }

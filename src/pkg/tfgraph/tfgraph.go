@@ -1,22 +1,21 @@
 package tfgraph
 
 import (
-	"fmt"
-
 	"github.com/spilliams/tunnelvision/src/pkg/grapher"
 )
 
-func TfGraph(inFile string) error {
+func TfGraph(inFile string, outFile string) error {
 	gg := grapher.NewGrapher()
 	gvLoader := grapher.NewGraphvizLoader()
 	gg.RegisterLoader("dot", gvLoader)
 	gg.RegisterLoader("gv", gvLoader)
 
-	g, err := gg.LoadGraphFromFile(inFile)
-	if err != nil {
+	if err := gg.LoadGraphFromFile(inFile); err != nil {
 		return err
 	}
-	fmt.Println(g)
 
-	return nil
+	gvWriter := grapher.NewGraphvizWriter()
+	gg.RegisterWriter("dot", gvWriter)
+	gg.RegisterWriter("gv", gvWriter)
+	return gg.WriteGraphToFile(outFile)
 }

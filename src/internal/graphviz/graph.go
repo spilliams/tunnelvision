@@ -21,3 +21,10 @@ func (g *graph) Nodes() []pkg.Node {
 	}
 	return nodes
 }
+
+func (g *graph) WalkNodes(f func(pkg.Node) pkg.Node) {
+	for _, n := range g.Nodes() {
+		n = f(n)
+		// TODO if n == nil g.RemoveNode(n)
+	}
+}

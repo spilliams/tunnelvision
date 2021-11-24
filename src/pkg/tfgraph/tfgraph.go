@@ -2,8 +2,10 @@ package tfgraph
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spilliams/tunnelvision/src/internal/graphviz"
+	"github.com/spilliams/tunnelvision/src/pkg"
 	"github.com/spilliams/tunnelvision/src/pkg/grapher"
 )
 
@@ -21,6 +23,11 @@ func TfGraph(inFile string, outFile string) error {
 	// work on them one at a time, so that later we could put them under feature
 	// flags.
 	g := gg.Graph()
+	g.WalkNodes(func(n pkg.Node) pkg.Node {
+		n.SetName(strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(n.String(), "\""), "\""), "[root] "))
+		return n
+	})
+
 	for _, node := range g.Nodes() {
 		fmt.Println(node)
 	}

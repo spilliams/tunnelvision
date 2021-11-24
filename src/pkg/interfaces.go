@@ -19,8 +19,10 @@ type GraphWriter interface {
 type Graph interface {
 	String() string
 	Nodes() []Node
+	WalkNodes(func(Node) Node)
 }
 
 type Node interface {
 	String() string
+	SetName(string)
 }

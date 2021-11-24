@@ -9,3 +9,7 @@ type node struct {
 func (n *node) String() string {
 	return n.f9l.Name
 }
+
+func (n *node) SetName(s string) {
+	n.f9l.Name = s
+}

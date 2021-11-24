@@ -1,14 +1,14 @@
 package pkg
 
 type Grapher interface {
-	RegisterLoader(extension string, l Loader)
+	RegisterReader(extension string, r GraphReader)
 	RegisterWriter(extension string, w GraphWriter)
-	LoadGraphFromFile(filename string) error
+	ReadGraphFromFile(filename string) error
 	WriteGraphToFile(filename string) error
 }
 
-type Loader interface {
-	LoadGraphFromFile(filename string) (Graph, error)
+type GraphReader interface {
+	Read(filename string) (Graph, error)
 }
 
 type GraphWriter interface {

@@ -6,11 +6,11 @@ import (
 
 func TfGraph(inFile string, outFile string) error {
 	gg := grapher.NewGrapher()
-	gvLoader := grapher.NewGraphvizLoader()
-	gg.RegisterLoader("dot", gvLoader)
-	gg.RegisterLoader("gv", gvLoader)
+	gvReader := grapher.NewGraphvizReader()
+	gg.RegisterReader("dot", gvReader)
+	gg.RegisterReader("gv", gvReader)
 
-	if err := gg.LoadGraphFromFile(inFile); err != nil {
+	if err := gg.ReadGraphFromFile(inFile); err != nil {
 		return err
 	}
 

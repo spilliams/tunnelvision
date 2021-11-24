@@ -9,38 +9,38 @@ import (
 
 func NewGrapher() pkg.Grapher {
 	return &grapher{
-		loaders: map[string]pkg.Loader{},
+		readers: map[string]pkg.GraphReader{},
 		writers: map[string]pkg.GraphWriter{},
 	}
 }
 
 type grapher struct {
-	loaders map[string]pkg.Loader
+	readers map[string]pkg.GraphReader
 	writers map[string]pkg.GraphWriter
 	graph   pkg.Graph
 }
 
-func (gg *grapher) RegisterLoader(extension string, l pkg.Loader) {
-	gg.loaders[extension] = l
+func (gg *grapher) RegisterReader(extension string, l pkg.GraphReader) {
+	gg.readers[extension] = l
 }
 
 func (gg *grapher) RegisterWriter(extension string, w pkg.GraphWriter) {
 	gg.writers[extension] = w
 }
 
-func (gg *grapher) LoadGraphFromFile(filename string) error {
+func (gg *grapher) ReadGraphFromFile(filename string) error {
 	ext, err := extension(filename)
 	if err != nil {
 		return err
 	}
-	loader, ok := gg.loaders[ext]
+	reader, ok := gg.readers[ext]
 	if !ok {
 		return fmt.Errorf("grapher does not recognize file extension %s", ext)
 	}
-	if loader == nil {
-		return fmt.Errorf("grapher had a nil loader registered to extension %s", ext)
+	if reader == nil {
+		return fmt.Errorf("grapher had a nil reader registered to extension %s", ext)
 	}
-	gg.graph, err = loader.LoadGraphFromFile(filename)
+	gg.graph, err = reader.Read(filename)
 	return err
 }
 

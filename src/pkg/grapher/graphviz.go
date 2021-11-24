@@ -8,16 +8,16 @@ import (
 	"github.com/spilliams/tunnelvision/src/pkg"
 )
 
-type graphvizLoader struct{}
+type graphvizReader struct{}
 
-// NewGraphvizLoader returns a new file loader that knows how to read graphviz
+// NewGraphvizReader returns a new file-reader that knows how to read graphviz
 // files. It makes an assumption that the first node in the file is the root of
 // the graph
-func NewGraphvizLoader() pkg.Loader {
-	return &graphvizLoader{}
+func NewGraphvizReader() pkg.GraphReader {
+	return &graphvizReader{}
 }
 
-func (gvl *graphvizLoader) LoadGraphFromFile(filename string) (pkg.Graph, error) {
+func (gvl *graphvizReader) Read(filename string) (pkg.Graph, error) {
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err

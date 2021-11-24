@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+	"github.com/spilliams/tunnelvision/src/internal/grapher"
 	"github.com/spilliams/tunnelvision/src/internal/hcl"
 )
 
@@ -13,6 +16,7 @@ func newFileCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(newParseFileCommand())
+	cmd.AddCommand(newGraphFileCommand())
 
 	return cmd
 }
@@ -24,6 +28,22 @@ func newParseFileCommand() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return hcl.ParseHCLFile(args[0])
+		},
+	}
+}
+
+func newGraphFileCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:   "graph FILE",
+		Short: "perform operations on a single .dot or .gv file",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			g, err := grapher.LoadFromFile(args[0])
+			if err != nil {
+				return err
+			}
+			fmt.Println(g)
+			return nil
 		},
 	}
 }

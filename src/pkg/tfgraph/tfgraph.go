@@ -1,9 +1,9 @@
 package tfgraph
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spilliams/tunnelvision/src/internal/graphviz"
 	"github.com/spilliams/tunnelvision/src/pkg"
 	"github.com/spilliams/tunnelvision/src/pkg/grapher"
@@ -28,12 +28,87 @@ func TfGraph(inFile string, outFile string) error {
 		return n
 	})
 
-	for _, node := range g.Nodes() {
-		fmt.Println(node)
-	}
+	g.WalkNodes(filterNode)
+
+	// for _, node := range g.Nodes() {
+	// 	fmt.Println(node)
+	// }
 
 	gvWriter := graphviz.NewWriter()
 	gg.RegisterWriter("dot", gvWriter)
 	gg.RegisterWriter("gv", gvWriter)
 	return gg.WriteGraphToFile(outFile)
 }
+
+func filterNode(n pkg.Node) pkg.Node {
+	t := typeOfNode(n)
+	if t == nodeTypeUnknown {
+		logrus.Warnf("node type is unknown! node: %s", n)
+	}
+	return n
+	// switch typeOfNode(n) {
+	// case nodeTypeUnknown:
+	// 	logrus.Warnf("node type is unknown! dropping. node: %s", n)
+	// 	return nil
+	// // case nodeTypeVariable:
+	// // case nodeTypeOutput:
+	// // case nodeTypeModule:
+	// // case nodeTypeData:
+	// // case nodeTypeResource:
+	// case nodeTypeMeta:
+	// 	return nil
+	// case nodeTypeProvider:
+	// 	return nil
+	// case nodeTypeRoot:
+	// 	return nil
+	// default:
+	// 	return n
+	// }
+}
+
+func typeOfNode(n pkg.Node) nodeType {
+	name := n.String()
+	if strings.Contains(name, "provider[\\\"") {
+		return nodeTypeProvider
+	}
+	if strings.HasPrefix(name, "meta.") {
+		return nodeTypeMeta
+	}
+	if name == "root" {
+		return nodeTypeRoot
+	}
+
+	parts := strings.Split(name, ".")
+	if len(parts)%2 == 1 {
+		return nodeTypeData
+	}
+
+	penult := parts[len(parts)-2]
+	switch penult {
+	case "var":
+		return nodeTypeVariable
+	case "output":
+		return nodeTypeOutput
+	case "local":
+		return nodeTypeLocal
+	case "module":
+		return nodeTypeModule
+	default:
+		return nodeTypeResource
+	}
+}
+
+type nodeType int
+
+const (
+	nodeTypeUnknown = iota
+	nodeTypeVariable
+	nodeTypeLocal
+	nodeTypeOutput
+	nodeTypeModule
+	nodeTypeData
+	nodeTypeResource
+	nodeTypeMeta
+	nodeTypeProvider
+	nodeTypeRoot
+)

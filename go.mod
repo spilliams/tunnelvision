@@ -3,6 +3,7 @@ module github.com/spilliams/tunnelvision
 go 1.17
 
 require (
+	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/hashicorp/hcl/v2 v2.10.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1

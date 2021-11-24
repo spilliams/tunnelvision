@@ -5,6 +5,7 @@ type Grapher interface {
 	RegisterWriter(extension string, w GraphWriter)
 	ReadGraphFromFile(filename string) error
 	WriteGraphToFile(filename string) error
+	Graph() Graph
 }
 
 type GraphReader interface {
@@ -16,5 +17,10 @@ type GraphWriter interface {
 }
 
 type Graph interface {
+	String() string
+	Nodes() []Node
+}
+
+type Node interface {
 	String() string
 }

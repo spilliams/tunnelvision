@@ -59,6 +59,10 @@ func (gg *grapher) WriteGraphToFile(filename string) error {
 	return writer.Write(gg.graph, filename)
 }
 
+func (gg *grapher) Graph() pkg.Graph {
+	return gg.graph
+}
+
 func extension(filename string) (string, error) {
 	parts := strings.Split(filename, ".")
 	if len(parts) == 1 {

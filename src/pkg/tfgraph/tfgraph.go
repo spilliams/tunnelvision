@@ -24,7 +24,7 @@ func TfGraph(inFile string, outFile string) error {
 	// flags.
 	g := gg.Graph()
 	g.WalkNodes(func(n pkg.Node) pkg.Node {
-		n.SetName(strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(n.String(), "\""), "\""), "[root] "))
+		n.SetAttribute(graphviz.LabelAttributeKey, strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(n.String(), "\""), "\""), "[root] "))
 		return n
 	})
 
@@ -67,7 +67,7 @@ func filterNode(n pkg.Node) pkg.Node {
 }
 
 func typeOfNode(n pkg.Node) nodeType {
-	name := n.String()
+	name := n.Attribute(graphviz.LabelAttributeKey)
 	if strings.Contains(name, "provider[\\\"") {
 		return nodeTypeProvider
 	}

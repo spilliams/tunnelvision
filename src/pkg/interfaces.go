@@ -24,5 +24,10 @@ type Graph interface {
 
 type Node interface {
 	String() string
-	SetName(string)
+	Attribute(AttributeKey) string
+	SetAttribute(AttributeKey, string)
+}
+
+type AttributeKey interface {
+	String() string
 }

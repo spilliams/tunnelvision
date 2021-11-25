@@ -24,11 +24,7 @@ func New(inFile string, logger *logrus.Logger, outFile string) error {
 	// work on them one at a time, so that later we could put them under feature
 	// flags.
 	g := gg.Graph()
-	g.WalkNodes(func(n pkg.Node) pkg.Node {
-		n.SetAttribute(graphviz.LabelAttributeKey, strings.TrimPrefix(strings.TrimSuffix(strings.TrimPrefix(n.String(), "\""), "\""), "[root] "))
-		return n
-	})
-
+	g.WalkNodes(labelNode)
 	g.WalkNodes(filterNode)
 
 	// for _, node := range g.Nodes() {
@@ -39,6 +35,14 @@ func New(inFile string, logger *logrus.Logger, outFile string) error {
 	gg.RegisterWriter("dot", gvWriter)
 	gg.RegisterWriter("gv", gvWriter)
 	return gg.WriteGraphToFile(outFile)
+}
+
+func labelNode(n pkg.Node) pkg.Node {
+	l := strings.TrimPrefix(n.String(), "\"")
+	l = strings.TrimSuffix(l, "\"")
+	l = strings.TrimPrefix(l, "[root] ")
+	n.SetAttribute(graphviz.LabelAttributeKey, l)
+	return n
 }
 
 func filterNode(n pkg.Node) pkg.Node {

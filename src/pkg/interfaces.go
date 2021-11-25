@@ -1,6 +1,13 @@
 package pkg
 
+import "github.com/sirupsen/logrus"
+
+type Logger interface {
+	SetLogger(*logrus.Logger)
+}
+
 type Grapher interface {
+	Logger
 	RegisterReader(extension string, r GraphReader)
 	RegisterWriter(extension string, w GraphWriter)
 	ReadGraphFromFile(filename string) error
@@ -9,14 +16,17 @@ type Grapher interface {
 }
 
 type GraphReader interface {
+	Logger
 	Read(filename string) (Graph, error)
 }
 
 type GraphWriter interface {
+	Logger
 	Write(g Graph, filename string) error
 }
 
 type Graph interface {
+	Logger
 	String() string
 	Nodes() []Node
 	WalkNodes(func(Node) Node)

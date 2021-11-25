@@ -9,8 +9,9 @@ import (
 	"github.com/spilliams/tunnelvision/src/pkg/grapher"
 )
 
-func TfGraph(inFile string, outFile string) error {
+func New(inFile string, logger *logrus.Logger, outFile string) error {
 	gg := grapher.NewGrapher()
+	gg.SetLogger(logger)
 	gvReader := graphviz.NewReader()
 	gg.RegisterReader("dot", gvReader)
 	gg.RegisterReader("gv", gvReader)
@@ -41,29 +42,24 @@ func TfGraph(inFile string, outFile string) error {
 }
 
 func filterNode(n pkg.Node) pkg.Node {
-	t := typeOfNode(n)
-	if t == nodeTypeUnknown {
-		logrus.Warnf("node type is unknown! node: %s", n)
+	switch typeOfNode(n) {
+	case nodeTypeUnknown:
+		logrus.Warnf("node type is unknown! dropping. node: %s", n)
+		return nil
+	// case nodeTypeVariable:
+	// case nodeTypeOutput:
+	// case nodeTypeModule:
+	// case nodeTypeData:
+	// case nodeTypeResource:
+	case nodeTypeMeta:
+		return nil
+	case nodeTypeProvider:
+		return nil
+	case nodeTypeRoot:
+		return nil
+	default:
+		return n
 	}
-	return n
-	// switch typeOfNode(n) {
-	// case nodeTypeUnknown:
-	// 	logrus.Warnf("node type is unknown! dropping. node: %s", n)
-	// 	return nil
-	// // case nodeTypeVariable:
-	// // case nodeTypeOutput:
-	// // case nodeTypeModule:
-	// // case nodeTypeData:
-	// // case nodeTypeResource:
-	// case nodeTypeMeta:
-	// 	return nil
-	// case nodeTypeProvider:
-	// 	return nil
-	// case nodeTypeRoot:
-	// 	return nil
-	// default:
-	// 	return n
-	// }
 }
 
 func typeOfNode(n pkg.Node) nodeType {

@@ -3,7 +3,7 @@ package cli
 import (
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -31,17 +31,17 @@ func init() {
 }
 
 func initLogger() {
-	log.SetLevel(log.InfoLevel)
-	log.SetFormatter(&log.TextFormatter{})
+	logrus.SetLevel(logrus.InfoLevel)
+	logrus.SetFormatter(&logrus.TextFormatter{})
 	if verbose {
-		log.SetLevel(log.DebugLevel)
+		logrus.SetLevel(logrus.DebugLevel)
 	}
 }
 
 // Execute runs the cli in this package
 func Execute() {
 	if err := newRootCmd().Execute(); err != nil {
-		log.Error(err)
+		logrus.Error(err)
 		os.Exit(1)
 	}
 }

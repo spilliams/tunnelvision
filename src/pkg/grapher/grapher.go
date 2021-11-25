@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spilliams/tunnelvision/src/pkg"
 )
 
@@ -15,16 +16,23 @@ func NewGrapher() pkg.Grapher {
 }
 
 type grapher struct {
+	*logrus.Logger
 	readers map[string]pkg.GraphReader
 	writers map[string]pkg.GraphWriter
 	graph   pkg.Graph
 }
 
+func (gg *grapher) SetLogger(l *logrus.Logger) {
+	gg.Logger = l
+}
+
 func (gg *grapher) RegisterReader(extension string, l pkg.GraphReader) {
+	l.SetLogger(gg.Logger)
 	gg.readers[extension] = l
 }
 
 func (gg *grapher) RegisterWriter(extension string, w pkg.GraphWriter) {
+	w.SetLogger(gg.Logger)
 	gg.writers[extension] = w
 }
 

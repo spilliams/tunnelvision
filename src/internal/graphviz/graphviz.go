@@ -5,16 +5,23 @@ import (
 	"os"
 
 	"github.com/awalterschulze/gographviz"
+	"github.com/sirupsen/logrus"
 	"github.com/spilliams/tunnelvision/src/pkg"
 )
 
-type reader struct{}
+type reader struct {
+	*logrus.Logger
+}
 
 // NewReader returns a new file-reader that knows how to read graphviz
 // files. It makes an assumption that the first node in the file is the root of
 // the graph
 func NewReader() pkg.GraphReader {
 	return &reader{}
+}
+
+func (r *reader) SetLogger(l *logrus.Logger) {
+	r.Logger = l
 }
 
 func (r *reader) Read(filename string) (pkg.Graph, error) {
@@ -27,13 +34,21 @@ func (r *reader) Read(filename string) (pkg.Graph, error) {
 	if err := gographviz.Analyse(graphAst, g); err != nil {
 		return nil, err
 	}
-	return &graph{g}, nil
+	graph := &graph{f9l: g}
+	graph.SetLogger(r.Logger)
+	return graph, nil
 }
 
-type writer struct{}
+type writer struct {
+	*logrus.Logger
+}
 
 func NewWriter() pkg.GraphWriter {
 	return &writer{}
+}
+
+func (w *writer) SetLogger(l *logrus.Logger) {
+	w.Logger = l
 }
 
 func (w *writer) Write(g pkg.Graph, filename string) error {

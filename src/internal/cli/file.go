@@ -1,7 +1,7 @@
 package cli
 
 import (
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spilliams/tunnelvision/src/internal/hcl"
 	"github.com/spilliams/tunnelvision/src/pkg/tfgraph"
@@ -38,11 +38,11 @@ func newGraphFileCommand() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			outFilename := "output.dot"
-			err := tfgraph.TfGraph(args[0], outFilename)
+			err := tfgraph.New(args[0], logrus.StandardLogger(), outFilename)
 			if err != nil {
 				return err
 			}
-			log.Infof("Wrote graph to %s", outFilename)
+			logrus.Infof("Wrote graph to %s", outFilename)
 			return nil
 		},
 	}

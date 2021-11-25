@@ -29,7 +29,15 @@ type Graph interface {
 	Logger
 	String() string
 	Nodes() []Node
-	WalkNodes(func(Node) Node)
+	// WalkNodes provides a way to iterate over the graph, operating on each node.
+	// It takes in an iterator function that takes in a node of the graph, and
+	// returns a node.
+	// WalkNodes returns two integers. The first one should be the total number of
+	// nodes walked (which should represent the number of nodes in the graph
+	// *before* the walking), and the second one should be the sum of nodes
+	// returned from the iterator (which should represent the number of nodes in
+	// the graph *after* the walking).
+	WalkNodes(func(Node) Node) (int, int)
 }
 
 type Node interface {

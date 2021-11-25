@@ -24,8 +24,10 @@ func New(inFile string, logger *logrus.Logger, outFile string) error {
 	// work on them one at a time, so that later we could put them under feature
 	// flags.
 	g := gg.Graph()
-	g.WalkNodes(labelNode)
-	g.WalkNodes(filterNode)
+	_, after := g.WalkNodes(labelNode)
+	logger.Infof("%d nodes labelled", after)
+	before, after := g.WalkNodes(filterNode)
+	logger.Infof("%d nodes filtered out", before-after)
 
 	// for _, node := range g.Nodes() {
 	// 	fmt.Println(node)

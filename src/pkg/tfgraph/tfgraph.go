@@ -20,18 +20,13 @@ func New(inFile string, logger *logrus.Logger, outFile string) error {
 		return err
 	}
 
-	// as of terraform 1.0.11, the graph has a *lot* of extra stuff. We should
-	// work on them one at a time, so that later we could put them under feature
-	// flags.
+	// terraform makes graphs with some extra stuff. We should work on them one at
+	// a time, so that later we could put them under feature flags.
 	g := gg.Graph()
 	_, after := g.WalkNodes(labelNode)
 	logger.Infof("%d nodes labelled", after)
 	before, after := g.WalkNodes(filterNode)
 	logger.Infof("%d nodes filtered out", before-after)
-
-	// for _, node := range g.Nodes() {
-	// 	fmt.Println(node)
-	// }
 
 	gvWriter := graphviz.NewWriter()
 	gg.RegisterWriter("dot", gvWriter)

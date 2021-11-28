@@ -38,6 +38,7 @@ type Graph interface {
 	// returned from the iterator (which should represent the number of nodes in
 	// the graph *after* the walking).
 	WalkNodes(func(Node) Node) (int, int)
+	RemoveNode(string) error
 }
 
 type Node interface {

@@ -28,6 +28,8 @@ func New(inFile string, logger *logrus.Logger, outFile string) error {
 	before, after := g.WalkNodes(filterNode)
 	logger.Infof("%d nodes filtered out", before-after)
 
+	// best way to cluster?
+
 	gvWriter := graphviz.NewWriter()
 	gg.RegisterWriter("dot", gvWriter)
 	gg.RegisterWriter("gv", gvWriter)
@@ -54,8 +56,8 @@ func filterNode(n pkg.Node) pkg.Node {
 	// case nodeTypeResource:
 	case nodeTypeMeta:
 		return nil
-	case nodeTypeProvider:
-		return nil
+	// case nodeTypeProvider:
+	// 	return nil
 	case nodeTypeRoot:
 		return nil
 	default:

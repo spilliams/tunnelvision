@@ -82,7 +82,7 @@ func typeOfNode(n pkg.Node) nodeType {
 		return nodeTypeRoot
 	}
 
-	parts := strings.Split(name, ".")
+	parts := nameParts(name)
 	if len(parts)%2 == 1 {
 		return nodeTypeData
 	}
@@ -125,4 +125,16 @@ func printNodeFunc(g pkg.Graph, logger *logrus.Logger) func(n pkg.Node) pkg.Node
 		logger.Debug()
 		return n
 	}
+}
+
+func nameParts(name string) []string {
+	// TODO: save out the stuff that's inside brackets
+	// split the leftover by "."
+	// reinstate the brackets to each part
+	return strings.Split(name, ".")
+}
+
+func clusterPath(name string) []string {
+	// TODO
+	return []string{}
 }

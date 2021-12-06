@@ -2,6 +2,9 @@
 try:
 	make build && bin/tv -v file graph tfgraph.dot
 
+.PHONY: test
+test:
+	go test ./...
 
 .PHONY: build
 build:

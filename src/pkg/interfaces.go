@@ -39,6 +39,7 @@ type Graph interface {
 	// the graph *after* the walking).
 	WalkNodes(func(Node) Node) (int, int)
 	RemoveNode(string) error
+	ChildToParents(name string) []string
 }
 
 type Node interface {

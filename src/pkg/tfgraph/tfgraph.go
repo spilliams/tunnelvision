@@ -28,7 +28,10 @@ func New(inFile string, logger *logrus.Logger, outFile string) error {
 	before, after := g.WalkNodes(filterNode)
 	logger.Infof("%d nodes filtered out", before-after)
 
-	// best way to cluster?
+	// TODO: best way to cluster?
+	// before, after := g.WalkNodes(clusterNode)
+
+	_, _ = g.WalkNodes(printNodeFunc(g, logger))
 
 	gvWriter := graphviz.NewWriter()
 	gg.RegisterWriter("dot", gvWriter)
@@ -40,6 +43,8 @@ func labelNode(n pkg.Node) pkg.Node {
 	l := strings.TrimPrefix(n.String(), "\"")
 	l = strings.TrimSuffix(l, "\"")
 	l = strings.TrimPrefix(l, "[root] ")
+	l = strings.TrimSuffix(l, " (expand)")
+	l = strings.TrimSuffix(l, " (close)")
 	n.SetAttribute(graphviz.LabelAttributeKey, l)
 	return n
 }
@@ -111,3 +116,13 @@ const (
 	nodeTypeProvider
 	nodeTypeRoot
 )
+
+func printNodeFunc(g pkg.Graph, logger *logrus.Logger) func(n pkg.Node) pkg.Node {
+	return func(n pkg.Node) pkg.Node {
+		logger.Debug(n)
+		logger.Debugf("%v: %v", graphviz.LabelAttributeKey, n.Attribute(graphviz.LabelAttributeKey))
+		logger.Debugf("parents: %v", g.ChildToParents(n.String()))
+		logger.Debug()
+		return n
+	}
+}

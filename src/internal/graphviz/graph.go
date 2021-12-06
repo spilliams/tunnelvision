@@ -51,15 +51,26 @@ func (g *graph) WalkNodes(f func(pkg.Node) pkg.Node) (int, int) {
 	return total, returned
 }
 
-func (g *graph) RemoveNode(name string) error {
+func (g *graph) ChildToParents(name string) []string {
 	parents := g.f9l.Relations.ChildToParents[name]
-	var parent string
+	names := make([]string, 0)
 	for parentName, ok := range parents {
 		if ok {
-			parent = parentName
-			break
+			names = append(names, parentName)
 		}
 	}
+	return names
+}
+
+func (g *graph) RemoveNode(name string) error {
+	parents := g.ChildToParents(name)
+	if parents == nil || len(parents) == 0 {
+		return fmt.Errorf("could not remove node %s: it has no parents?!", name)
+	}
+	if len(parents) > 1 {
+		return fmt.Errorf("could not remove node %s: it has multiple parents (%v)", name, parents)
+	}
+	parent := parents[0]
 	if err := g.f9l.RemoveNode(parent, name); err != nil {
 		return fmt.Errorf("could not remove node %s from parent %s: %v", name, parent, err)
 	}

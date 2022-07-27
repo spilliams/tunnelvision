@@ -1,4 +1,5 @@
 bin/
+.vscode/
 
 # some files i like to play with
 *.tf

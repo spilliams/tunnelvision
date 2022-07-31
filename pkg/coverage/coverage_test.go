@@ -23,8 +23,8 @@ func TestTerraformApplies(t *testing.T) {
 
 func TestNoApplyNoCoverage(t *testing.T) {
 	// if we don't apply the root, none of the resources should be covered
+
 	rootDir := "../../fixtures/examples/simple-resource"
-	// retryable errors in terraform testing.
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: rootDir,
 		Logger:       logger.Discard,
@@ -66,9 +66,10 @@ func TestNoApplyNoCoverage(t *testing.T) {
 }
 
 func TestListedResourceCoverage(t *testing.T) {
-	// if we don't apply the root, none of the resources should be covered
+	// if we apply the root of a resource with integer indexing, it should report
+	// correctly.
+
 	rootDir := "../../fixtures/examples/listed-resource"
-	// retryable errors in terraform testing.
 	tfopts := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: rootDir,
 		Logger:       logger.Discard,
@@ -95,9 +96,10 @@ func TestListedResourceCoverage(t *testing.T) {
 }
 
 func TestMappedResourceCoverage(t *testing.T) {
-	// if we don't apply the root, none of the resources should be covered
+	// if we apply the root of a resource with string indexing, it should report
+	// correctly.
+
 	rootDir := "../../fixtures/examples/mapped-resource"
-	// retryable errors in terraform testing.
 	tfopts := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: rootDir,
 		Logger:       logger.Discard,

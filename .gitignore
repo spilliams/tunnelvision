@@ -1,6 +1,9 @@
 bin/
 .vscode/
 
+.terraform/
+*.tfstate*
+
 # some files i like to play with
 *.tf
 *.hcl

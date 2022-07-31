@@ -14,7 +14,3 @@ resource "random_string" "this" {
   special          = true
   override_special = "abcdef"
 }
-
-output "hexes" {
-  value = { for k, v in random_string.this : k => v.result }
-}

@@ -7,7 +7,3 @@ resource "random_string" "this" {
   special          = true
   override_special = "abcdef"
 }
-
-output "hex" {
-  value = random_string.this.result
-}

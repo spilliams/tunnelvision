@@ -138,3 +138,9 @@ func (r *Report) Combine(other *Report) error {
 	r.actuals = append(r.actuals, other.actuals...)
 	return nil
 }
+
+// Reset empties the receiver of its plans. This effectively sets the coverage back to 0.
+// NB: This does not set the receiver's Mode to its default value.
+func (r *Report) Reset() {
+	r.actuals = make([]tfjson.Plan, 0)
+}

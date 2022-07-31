@@ -55,6 +55,7 @@ func TestNoApplyNoCoverage(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	postApply := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, terraformOptions)
+	r.Reset()
 	r.AddCoverage(postApply.RawPlan)
 	// after applying this root, if the Report is based on prior state, it should
 	// return 100% coverage

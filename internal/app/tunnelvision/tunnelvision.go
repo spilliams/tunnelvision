@@ -1,4 +1,4 @@
-package cli
+package tunnelvision
 
 import (
 	"os"
@@ -12,7 +12,7 @@ var verbose bool
 func newRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tunnelvision",
-		Short: "visualize and maintain your terraform",
+		Short: "visualize and maintain your terraform configurations",
 	}
 
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "make log output more verbose")

@@ -36,5 +36,7 @@ terragrunt, terraspace, tau, etc.
 - I would like the coverage report to be pretty like go's cover tool does.
 - I would like the coverage report to show me which variables I've used in testing
 - I would like the coverage report to drill into modules as long as they're local
+  - I would like a _module coverage report_ to be able to use plans from multiple roots
 - I would like the coverage of an integration test to show me which outputs I've used in testing
 - I would like the coverage to show which data resources have been used
+- I would like a CLI tool for showing me my current coverage (run `tf show` itself, without `testing` or `terratest`)

@@ -21,7 +21,7 @@ func TestTerraformApplies(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 }
 
-func TestTerraformNoApplyNoCoverage(t *testing.T) {
+func TestNoApplyNoCoverage(t *testing.T) {
 	// if we don't apply the root, none of the resources should be covered
 	rootDir := "../../fixtures/examples/simple-resource"
 	// retryable errors in terraform testing.
@@ -60,6 +60,64 @@ func TestTerraformNoApplyNoCoverage(t *testing.T) {
 	// return 100% coverage
 	r.Mode = PriorStateDeterminationMode
 	percent, _, err = r.Coverage()
+	assert.NilError(t, err)
+	assert.Equal(t, 1.0, percent)
+}
+
+func TestListedResourceCoverage(t *testing.T) {
+	// if we don't apply the root, none of the resources should be covered
+	rootDir := "../../fixtures/examples/listed-resource"
+	// retryable errors in terraform testing.
+	tfopts := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		TerraformDir: rootDir,
+		Logger:       logger.Discard,
+		NoColor:      true,
+
+		Vars: map[string]interface{}{
+			"qty": 1,
+		},
+	})
+	r, err := NewReport(rootDir)
+	assert.NilError(t, err)
+
+	defer terraform.Destroy(t, tfopts)
+
+	terraform.InitAndApply(t, tfopts)
+
+	// a resource in a list should be tracked properly by the report
+	plan := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, tfopts)
+	r.AddCoverage(plan.RawPlan)
+
+	percent, _, err := r.Coverage()
+	assert.NilError(t, err)
+	assert.Equal(t, 1.0, percent)
+}
+
+func TestMappedResourceCoverage(t *testing.T) {
+	// if we don't apply the root, none of the resources should be covered
+	rootDir := "../../fixtures/examples/mapped-resource"
+	// retryable errors in terraform testing.
+	tfopts := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		TerraformDir: rootDir,
+		Logger:       logger.Discard,
+		NoColor:      true,
+
+		Vars: map[string]interface{}{
+			"keys": []string{"foo"},
+		},
+	})
+	r, err := NewReport(rootDir)
+	assert.NilError(t, err)
+
+	defer terraform.Destroy(t, tfopts)
+
+	terraform.InitAndApply(t, tfopts)
+
+	// a resource in a list should be tracked properly by the report
+	plan := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, tfopts)
+	r.AddCoverage(plan.RawPlan)
+
+	percent, _, err := r.Coverage()
 	assert.NilError(t, err)
 	assert.Equal(t, 1.0, percent)
 }

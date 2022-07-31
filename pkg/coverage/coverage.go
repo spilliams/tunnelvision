@@ -2,6 +2,7 @@ package coverage
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 	tfjson "github.com/hashicorp/terraform-json"
@@ -60,14 +61,12 @@ func (r *Report) Coverage() (float64, []string, error) {
 	covered := r.generateExpectedMap()
 	fmt.Printf("expected map: %#v\n", covered)
 
-	for _, a := range r.actuals {
-		actualResources, err := r.listPlannedResources(a)
-		if err != nil {
-			return 0, nil, err
-		}
-		for _, name := range actualResources {
-			covered[name] = true
-		}
+	actualResources, err := r.listActualResources()
+	if err != nil {
+		return 0, nil, err
+	}
+	for _, name := range actualResources {
+		covered[name] = true
 	}
 	fmt.Printf("covered map: %#v\n", covered)
 
@@ -86,54 +85,49 @@ func (r *Report) Coverage() (float64, []string, error) {
 
 func (r *Report) generateExpectedMap() map[string]bool {
 	expected := map[string]bool{}
-	// TODO does not take indexing into account. Should it?
-	// TODO does not take data resources, providers, variables, or outputs into account
-	fmt.Printf("expected managed resources: %#v\n", r.expected.ManagedResources)
+	// fmt.Printf("expected managed resources: %#v\n", r.expected.ManagedResources)
 	for name := range r.expected.ManagedResources {
 		expected[name] = false
 	}
 
-	fmt.Printf("expected module calls: %#v\n", r.expected.ModuleCalls)
+	// fmt.Printf("expected module calls: %#v\n", r.expected.ModuleCalls)
 	for name := range r.expected.ModuleCalls {
 		expected[fmt.Sprintf("module.%s", name)] = false
 	}
-	// TODO inspect modules? Only if they're local?
 	return expected
 }
 
-func (r *Report) listPlannedResources(plan tfjson.Plan) ([]string, error) {
-	// fmt.Printf("prior state: %#v\n", plan.PriorState.Values.RootModule)
-	// fmt.Printf("planned values: %#v\n", plan.PlannedValues.RootModule)
-	// for _, ch := range plan.ResourceChanges {
-	// 	fmt.Printf("resource change: %#v (%#v)\n", ch, ch.Change.Actions)
-	// }
-	var resources []*tfjson.StateResource
-	switch r.Mode {
-	case PlannedValuesDeterminationMode:
-		resources = plan.PlannedValues.RootModule.Resources
-		break
-	case PriorStateDeterminationMode:
-		if plan.PriorState == nil {
-			return []string{}, nil
-		}
-		resources = plan.PriorState.Values.RootModule.Resources
-		break
-	default:
-		return []string{}, fmt.Errorf("unrecognized determination-mode '%s' See documentation for coverage.DeterminationMode", string(r.Mode))
-	}
+func (r *Report) listActualResources() ([]string, error) {
+	list := make([]string, 0)
 
-	list := make([]string, len(resources))
-	for i, change := range resources {
-		// if len(change.ModuleAddress) > 0 {
-		// 	list[i] = change.ModuleAddress
-		// 	continue
-		// }
-		list[i] = change.Address
+	for _, plan := range r.actuals {
+		var resources []*tfjson.StateResource
+		switch r.Mode {
+		case PlannedValuesDeterminationMode:
+			resources = plan.PlannedValues.RootModule.Resources
+			break
+		case PriorStateDeterminationMode:
+			if plan.PriorState == nil {
+				return []string{}, nil
+			}
+			resources = plan.PriorState.Values.RootModule.Resources
+			break
+		default:
+			return []string{}, fmt.Errorf("unrecognized determination-mode '%s' See documentation for coverage.DeterminationMode", string(r.Mode))
+		}
+
+		for _, change := range resources {
+			address := change.Address
+			if change.Index != nil {
+				// remove the final [foo] group
+				parts := strings.Split(address, "[")
+				address = strings.Join(parts[0:len(parts)-1], "[")
+			}
+			list = append(list, address)
+		}
 	}
 	return list, nil
 }
-
-// TODO: write coverage output in go covertool format?
 
 // Combine incorporates the coverages of the given Report into the receiver.
 func (r *Report) Combine(other *Report) error {

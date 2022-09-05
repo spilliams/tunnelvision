@@ -98,35 +98,49 @@ func (r *Report) generateExpectedMap() map[string]bool {
 }
 
 func (r *Report) listActualResources() ([]string, error) {
-	list := make([]string, 0)
+	set := make(map[string]bool, 0)
 
 	for _, plan := range r.actuals {
-		var resources []*tfjson.StateResource
+		var root *tfjson.StateModule
 		switch r.Mode {
 		case PlannedValuesDeterminationMode:
-			resources = plan.PlannedValues.RootModule.Resources
+			root = plan.PlannedValues.RootModule
 			break
 		case PriorStateDeterminationMode:
 			if plan.PriorState == nil {
 				return []string{}, nil
 			}
-			resources = plan.PriorState.Values.RootModule.Resources
+			root = plan.PriorState.Values.RootModule
 			break
 		default:
 			return []string{}, fmt.Errorf("unrecognized determination-mode '%s' See documentation for coverage.DeterminationMode", string(r.Mode))
 		}
 
-		for _, change := range resources {
-			address := change.Address
-			if change.Index != nil {
-				// remove the final [foo] group
-				parts := strings.Split(address, "[")
-				address = strings.Join(parts[0:len(parts)-1], "[")
-			}
-			list = append(list, address)
+		resources := listRootResources(root)
+
+		for _, resource := range resources {
+			set[resource] = true
 		}
 	}
-	return list, nil
+
+	return set2list(set), nil
+}
+
+func listRootResources(root *tfjson.StateModule) []string {
+	list := make([]string, 0)
+
+	// add all the resources from the root
+	for _, change := range root.Resources {
+		address := change.Address
+		if change.Index != nil {
+			// remove the final [foo] group
+			parts := strings.Split(address, "[")
+			address = strings.Join(parts[0:len(parts)-1], "[")
+		}
+		list = append(list, address)
+	}
+
+	return list
 }
 
 // Combine incorporates the coverages of the given Report into the receiver.
@@ -143,4 +157,14 @@ func (r *Report) Combine(other *Report) error {
 // NB: This does not set the receiver's Mode to its default value.
 func (r *Report) Reset() {
 	r.actuals = make([]tfjson.Plan, 0)
+}
+
+func set2list(set map[string]bool) []string {
+	i := 0
+	list := make([]string, len(set))
+	for k := range set {
+		list[i] = k
+		i++
+	}
+	return list
 }

@@ -17,6 +17,7 @@ func newRootCmd() *cobra.Command {
 
 	cmd.AddCommand(newParseFileCommand())
 	cmd.AddCommand(newGraphFileCommand())
+	cmd.AddCommand(newProviderCommand())
 
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "make log output more verbose")
 

@@ -1,7 +1,6 @@
 package tunnelvision
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -35,7 +34,8 @@ func newGraphModuleCommand() *cobra.Command {
 			parser := hcl.NewModuleParser()
 			parser.ParseModuleDirectory(rootDir)
 
-			fmt.Printf("%#v\n", parser.Parser())
+			logrus.Debugf("%#v", parser.Parser())
+			logrus.Debugf("%#v", parser.Module())
 			// err := tfgraph.New(args[0], logrus.StandardLogger(), outFilename)
 			// if err != nil {
 			// 	return err

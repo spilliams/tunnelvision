@@ -1,12 +1,14 @@
 package hcl
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/terraform-config-inspect/tfconfig"
 	"github.com/sirupsen/logrus"
 )
 
@@ -48,11 +50,13 @@ type ModuleParser interface {
 	ParseModuleDirectory(string) error
 	ParseTerraformFile(string) error
 	Parser() *hclparse.Parser
+	Module() *tfconfig.Module
 }
 
 type moduleParser struct {
 	fundamental *hclparse.Parser
 	parsed      map[string]*hcl.File
+	module      *tfconfig.Module
 }
 
 // NewModuleParser builds an object that conforms to the ModuleParser interface
@@ -64,6 +68,12 @@ func NewModuleParser() ModuleParser {
 }
 
 func (mp *moduleParser) ParseModuleDirectory(dirname string) error {
+	module, diags := tfconfig.LoadModule(dirname)
+	if diags.HasErrors() {
+		return fmt.Errorf(diags.Error())
+	}
+	mp.module = module
+
 	files, err := ioutil.ReadDir(dirname)
 	if err != nil {
 		return err
@@ -104,4 +114,8 @@ func (mp *moduleParser) ParseTerraformFile(filename string) error {
 
 func (mp *moduleParser) Parser() *hclparse.Parser {
 	return mp.fundamental
+}
+
+func (mp *moduleParser) Module() *tfconfig.Module {
+	return mp.module
 }

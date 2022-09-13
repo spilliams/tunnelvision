@@ -1,11 +1,13 @@
 package hcl
 
 import (
-	"fmt"
+	"io/ioutil"
+	"path"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // configFileSchema is the schema for the top-level of a config file. We use
@@ -40,14 +42,55 @@ var terraformBlockSchema = &hcl.BodySchema{
 	},
 }
 
-// ParseHCLFile parses an HCL file...
-func ParseHCLFile(filename string) error {
-	parser := hclparse.NewParser()
-	file, diags := parser.ParseHCLFile(filename)
-	if err := handleDiags(parser, diags); err != nil {
-		return fmt.Errorf("%#v", err)
+// ModuleParser is something that can parse a terraform module (configuration
+// directory)
+type ModuleParser interface {
+	ParseModuleDirectory(string) error
+	ParseTerraformFile(string) error
+	Parser() *hclparse.Parser
+}
+
+type moduleParser struct {
+	fundamental *hclparse.Parser
+	parsed      map[string]*hcl.File
+}
+
+// NewModuleParser builds an object that conforms to the ModuleParser interface
+func NewModuleParser() ModuleParser {
+	return &moduleParser{
+		fundamental: hclparse.NewParser(),
+		parsed:      make(map[string]*hcl.File, 0),
 	}
-	log.Debugf("%#v\n", file.Body)
+}
+
+func (mp *moduleParser) ParseModuleDirectory(dirname string) error {
+	files, err := ioutil.ReadDir(dirname)
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		logrus.Debugf("examining file %s", f.Name())
+		if strings.HasSuffix(f.Name(), ".tf") || strings.HasSuffix(f.Name(), ".hcl") {
+			fullname := path.Join(dirname, f.Name())
+			logrus.Debug("parsing!")
+			if err := mp.ParseTerraformFile(fullname); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// ParseTerraformFile parses a single file
+func (mp *moduleParser) ParseTerraformFile(filename string) error {
+	if mp.parsed[filename] != nil {
+		return nil
+	}
+	file, diags := mp.fundamental.ParseHCLFile(filename)
+	if err := handleDiags(mp.fundamental, diags); err != nil {
+		return err
+	}
+	mp.parsed[filename] = file
 
 	// log.Debugf("%s\n", file.Bytes)
 
@@ -57,4 +100,8 @@ func ParseHCLFile(filename string) error {
 	// }
 	// log.Debugf("%#v\n", attributes)
 	return nil
+}
+
+func (mp *moduleParser) Parser() *hclparse.Parser {
+	return mp.fundamental
 }

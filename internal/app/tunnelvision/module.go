@@ -1,10 +1,13 @@
 package tunnelvision
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spilliams/tunnelvision/internal/hcl"
 )
 
 func newGraphModuleCommand() *cobra.Command {
@@ -19,12 +22,20 @@ func newGraphModuleCommand() *cobra.Command {
 			}
 			if len(args) > 0 {
 				rootDir = args[0]
-				// clean path to absolute
+				rootDir, err = filepath.Abs(rootDir)
+				if err != nil {
+					return err
+				}
 			}
-			outFilename := "output.dot"
+			// outFilename := "output.dot"
 
 			logrus.Infof("reading configuration at %s", rootDir)
-			logrus.Infof("outputting graph in file %s", outFilename)
+			// logrus.Infof("outputting graph in file %s", outFilename)
+
+			parser := hcl.NewModuleParser()
+			parser.ParseModuleDirectory(rootDir)
+
+			fmt.Printf("%#v\n", parser.Parser())
 			// err := tfgraph.New(args[0], logrus.StandardLogger(), outFilename)
 			// if err != nil {
 			// 	return err

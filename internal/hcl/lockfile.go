@@ -17,6 +17,14 @@ var lockfileSchema = &hcl.BodySchema{
 	},
 }
 
+// LockfileProvider represents a single `provider` block of a Lockfile
+type LockfileProvider struct {
+	ID          string   `hcl:"id,label"`
+	Version     string   `hcl:"version"`
+	Constraints string   `hcl:"constraints,optional"`
+	Hashes      []string `hcl:"hashes,optional"`
+}
+
 // Lockfile represents a Terraform lockfile
 type Lockfile struct {
 	Providers []*LockfileProvider `hcl:"provider,block"`
@@ -30,14 +38,6 @@ func (lf *Lockfile) CompactProviders() []string {
 		providers[i] = fmt.Sprintf("%s@%s", provider.ID, provider.Version)
 	}
 	return providers
-}
-
-// LockfileProvider represents a single `provider` block of a Lockfile
-type LockfileProvider struct {
-	ID          string   `hcl:"id,label"`
-	Version     string   `hcl:"version"`
-	Constraints string   `hcl:"constraints,optional"`
-	Hashes      []string `hcl:"hashes,optional"`
 }
 
 func (lp *LockfileProvider) String() string {

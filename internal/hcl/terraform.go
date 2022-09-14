@@ -28,6 +28,17 @@ var configFileSchema = &hcl.BodySchema{
 	},
 }
 
+// type configuration struct {
+// 	// Terraform
+// 	providers []*LockfileProvider `hcl:"provider,block`
+// 	// Variables
+// 	// Locals
+// 	// Outputs
+// 	// Modules
+// 	// Resources
+// 	// Datas
+// }
+
 // terraformBlockSchema is the schema for a top-level "terraform" block in
 // a configuration file.
 var terraformBlockSchema = &hcl.BodySchema{
@@ -55,7 +66,6 @@ type ModuleParser interface {
 
 type moduleParser struct {
 	fundamental *hclparse.Parser
-	parsed      map[string]*hcl.File
 	module      *tfconfig.Module
 }
 
@@ -63,7 +73,6 @@ type moduleParser struct {
 func NewModuleParser() ModuleParser {
 	return &moduleParser{
 		fundamental: hclparse.NewParser(),
-		parsed:      make(map[string]*hcl.File, 0),
 	}
 }
 
@@ -93,22 +102,25 @@ func (mp *moduleParser) ParseModuleDirectory(dirname string) error {
 
 // ParseTerraformFile parses a single file
 func (mp *moduleParser) ParseTerraformFile(filename string) error {
-	if mp.parsed[filename] != nil {
-		return nil
-	}
 	file, diags := mp.fundamental.ParseHCLFile(filename)
 	if err := handleDiags(mp.fundamental, diags); err != nil {
 		return err
 	}
-	mp.parsed[filename] = file
 
-	// log.Debugf("%s\n", file.Bytes)
+	logrus.Debugf("%v", file.Body)
 
-	// attributes, diags := file.Body.JustAttributes()
-	// if diags.HasErrors() {
-	// 	return fmt.Errorf("%#v", diags.Error())
+	// c := &configuration{}
+	// content, diags := file.Body.Content(configFileSchema)
+	// if err := handleDiags(mp.fundamental, diags); err != nil {
+	// 	return err
 	// }
-	// log.Debugf("%#v\n", attributes)
+	// ctx := &hcl.EvalContext{
+	// 	Variables: map[string]cty.Value{},
+	// 	Functions: map[string]function.Function{},
+	// }
+	// for _, block := range content.Blocks {
+	// }
+
 	return nil
 }
 

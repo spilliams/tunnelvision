@@ -9,6 +9,9 @@ import (
 )
 
 func handleDiags(parser *hclparse.Parser, diags hcl.Diagnostics) error {
+	if diags == nil {
+		return nil
+	}
 	if diags.HasErrors() {
 		wr := hcl.NewDiagnosticTextWriter(
 			os.Stderr,

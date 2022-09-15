@@ -20,8 +20,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	logrus.Debugf("%#v", parser.Parser())
-	logrus.Debugf("%#v", parser.Module())
+	logrus.Debugf("parser: %#v", parser.Parser())
+	logrus.Debugf("module: %#v", parser.Module())
+	logrus.Debugf("configuration: %#v", parser.Configuration())
 
 	logrus.Info("Done")
 }

@@ -36,11 +36,7 @@ func newGraphModuleCommand() *cobra.Command {
 
 			logrus.Debugf("%#v", parser.Parser())
 			logrus.Debugf("%#v", parser.Module())
-			// err := tfgraph.New(args[0], logrus.StandardLogger(), outFilename)
-			// if err != nil {
-			// 	return err
-			// }
-			// logrus.Infof("Wrote graph to %s", outFilename)
+
 			return nil
 		},
 	}

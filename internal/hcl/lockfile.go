@@ -52,14 +52,14 @@ func (lp *LockfileProvider) String() string {
 func ParseLockfile(filename string) (*Lockfile, error) {
 	parser := hclparse.NewParser()
 	f, diags := parser.ParseHCLFile(filename)
-	if err := handleDiags(parser, diags); err != nil {
+	if err := handleDiags(diags, parser.Files(), nil); err != nil {
 		return nil, err
 	}
 
 	lockfile := &Lockfile{}
 	lockfile.Providers = make([]*LockfileProvider, 0)
 	content, diags := f.Body.Content(lockfileSchema)
-	if err := handleDiags(parser, diags); err != nil {
+	if err := handleDiags(diags, parser.Files(), nil); err != nil {
 		return nil, err
 	}
 	ctx := &hcl.EvalContext{
@@ -72,7 +72,7 @@ func ParseLockfile(filename string) (*Lockfile, error) {
 		}
 		provider := LockfileProvider{}
 		diags := gohcl.DecodeBody(block.Body, ctx, &provider)
-		if err := handleDiags(parser, diags); err != nil {
+		if err := handleDiags(diags, parser.Files(), nil); err != nil {
 			return nil, err
 		}
 		provider.ID = block.Labels[0]

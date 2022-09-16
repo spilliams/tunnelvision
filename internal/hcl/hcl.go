@@ -2,25 +2,28 @@ package hcl
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclparse"
 )
 
-func handleDiags(parser *hclparse.Parser, diags hcl.Diagnostics) error {
+func handleDiags(diags hcl.Diagnostics, files map[string]*hcl.File, writer io.Writer) error {
 	if diags == nil {
 		return nil
 	}
+	if writer == nil {
+		writer = os.Stderr
+	}
 	if diags.HasErrors() {
 		wr := hcl.NewDiagnosticTextWriter(
-			os.Stderr,
-			parser.Files(),
-			100,  // wrapping width
-			true, // colors
+			writer,
+			files,
+			100,   // wrapping width
+			false, // colors
 		)
 		wr.WriteDiagnostics(diags)
-		return fmt.Errorf("errors found")
+		return fmt.Errorf("diagnostic errors found")
 	}
 	return nil
 }

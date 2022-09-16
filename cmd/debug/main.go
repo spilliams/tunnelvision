@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -23,6 +25,18 @@ func main() {
 	logrus.Debugf("parser: %#v", parser.Parser())
 	logrus.Debugf("module: %#v", parser.Module())
 	logrus.Debugf("configuration: %#v", parser.Configuration())
+
+	graph, err := parser.DependencyGraph()
+	if err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+	graphJSON, err := json.MarshalIndent(graph, "", "  ")
+	if err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+	fmt.Printf("dependencies: %v\n", string(graphJSON))
 
 	logrus.Info("Done")
 }

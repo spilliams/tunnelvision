@@ -54,9 +54,9 @@ func newConfiguration() *configuration {
 	}
 }
 
-// ModuleParser is something that can parse a terraform module (configuration
+// Module is something that can parse a terraform module (configuration
 // directory)
-type ModuleParser interface {
+type Module interface {
 	Configuration() *configuration
 	Module() *tfconfig.Module
 	ParseModuleDirectory(string) error
@@ -65,28 +65,28 @@ type ModuleParser interface {
 	DependencyGraph() (map[string][]string, error)
 }
 
-type moduleParser struct {
+type module struct {
 	cfg         *configuration
 	fundamental *hclparse.Parser
 	module      *tfconfig.Module
 	*logrus.Logger
 }
 
-// NewModuleParser builds an object that conforms to the ModuleParser interface
-func NewModuleParser(logger *logrus.Logger) ModuleParser {
-	return &moduleParser{
+// NewModule builds an object that conforms to the ModuleParser interface
+func NewModule(logger *logrus.Logger) Module {
+	return &module{
 		cfg:         newConfiguration(),
 		fundamental: hclparse.NewParser(),
 		Logger:      logger,
 	}
 }
 
-func (mp *moduleParser) ParseModuleDirectory(dirname string) error {
+func (m *module) ParseModuleDirectory(dirname string) error {
 	module, diags := tfconfig.LoadModule(dirname)
 	if diags.HasErrors() {
 		return fmt.Errorf(diags.Error())
 	}
-	mp.module = module
+	m.module = module
 
 	files, err := ioutil.ReadDir(dirname)
 	if err != nil {
@@ -100,7 +100,7 @@ func (mp *moduleParser) ParseModuleDirectory(dirname string) error {
 		if strings.HasSuffix(f.Name(), ".tf") || strings.HasSuffix(f.Name(), ".hcl") {
 			fullname := path.Join(dirname, f.Name())
 			logrus.Debug("parsing!")
-			if err := mp.ParseTerraformFile(fullname); err != nil {
+			if err := m.ParseTerraformFile(fullname); err != nil {
 				return err
 			}
 		}
@@ -109,14 +109,14 @@ func (mp *moduleParser) ParseModuleDirectory(dirname string) error {
 }
 
 // ParseTerraformFile parses a single file
-func (mp *moduleParser) ParseTerraformFile(filename string) error {
-	file, diags := mp.fundamental.ParseHCLFile(filename)
-	if err := handleDiags(diags, mp.fundamental.Files(), mp.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
+func (m *module) ParseTerraformFile(filename string) error {
+	file, diags := m.fundamental.ParseHCLFile(filename)
+	if err := handleDiags(diags, m.fundamental.Files(), m.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
 		return err
 	}
 
 	content, _, diags := file.Body.PartialContent(configFileSchema)
-	if err := handleDiags(diags, mp.fundamental.Files(), mp.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
+	if err := handleDiags(diags, m.fundamental.Files(), m.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
 		return err
 	}
 
@@ -126,11 +126,11 @@ func (mp *moduleParser) ParseTerraformFile(filename string) error {
 		if block.Type == "locals" {
 			var locals hcl.Attributes
 			locals, diags = block.Body.JustAttributes()
-			if err := handleDiags(diags, mp.fundamental.Files(), mp.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
+			if err := handleDiags(diags, m.fundamental.Files(), m.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
 				return err
 			}
 			for name, attr := range locals {
-				mp.cfg.locals["local"+separator+name] = attr
+				m.cfg.locals["local"+separator+name] = attr
 			}
 		} else {
 			var blockName string
@@ -147,9 +147,9 @@ func (mp *moduleParser) ParseTerraformFile(filename string) error {
 				blockName = "data" + separator
 			}
 			blockName += strings.Join(block.Labels, separator)
-			mp.cfg.blocks[blockName] = block
+			m.cfg.blocks[blockName] = block
 		}
-		if err := handleDiags(diags, mp.fundamental.Files(), mp.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
+		if err := handleDiags(diags, m.fundamental.Files(), m.Logger.WriterLevel(logrus.WarnLevel)); err != nil {
 			return err
 		}
 	}
@@ -157,14 +157,14 @@ func (mp *moduleParser) ParseTerraformFile(filename string) error {
 	return nil
 }
 
-func (mp *moduleParser) DependencyGraph() (map[string][]string, error) {
+func (m *module) DependencyGraph() (map[string][]string, error) {
 	graph := make(map[string][]string, 0)
 
-	for name, local := range mp.cfg.locals {
+	for name, local := range m.cfg.locals {
 		graph[name] = attributeDependencies(local)
 	}
 
-	for name, block := range mp.cfg.blocks {
+	for name, block := range m.cfg.blocks {
 		deps, err := blockDependencies(block)
 		if err != nil {
 			return nil, err
@@ -172,11 +172,11 @@ func (mp *moduleParser) DependencyGraph() (map[string][]string, error) {
 		graph[name] = deps
 	}
 
-	mp.Debugf("dependency graph before pruning for index and unknowns: %#v", graph)
+	m.Debugf("dependency graph before pruning for index and unknowns: %#v", graph)
 
 	// dependencies go all the way through attribute names. For instance, an
 	// output.stack_name might depend on random_string.slug.result, but the
-	// mp.cfg.blocks map only includes a "random_string.slug".
+	// m.cfg.blocks map only includes a "random_string.slug".
 	// So for each dependency we need to check: is it in our cfg? Or do we need
 	// to truncate it?
 	// Also, the downstreams here include things like "string" (the raw type
@@ -188,7 +188,7 @@ func (mp *moduleParser) DependencyGraph() (map[string][]string, error) {
 			parts := strings.Split(downstream, separator)
 			for limit := len(parts); limit > 0; limit-- {
 				trial := strings.Join(parts[0:limit], separator)
-				if !mp.Has(trial) {
+				if !m.Has(trial) {
 					continue
 				}
 				keepers = append(keepers, trial)
@@ -216,11 +216,11 @@ func unique[T comparable](list []T) []T {
 	return uniq
 }
 
-func (mp *moduleParser) Has(path string) bool {
-	if mp.cfg.locals[path] != nil {
+func (m *module) Has(path string) bool {
+	if m.cfg.locals[path] != nil {
 		return true
 	}
-	if mp.cfg.blocks[path] != nil {
+	if m.cfg.blocks[path] != nil {
 		return true
 	}
 	return false
@@ -259,14 +259,14 @@ func expressionDependencies(expr hcl.Expression) []string {
 	return deps
 }
 
-func (mp *moduleParser) Parser() *hclparse.Parser {
-	return mp.fundamental
+func (m *module) Parser() *hclparse.Parser {
+	return m.fundamental
 }
 
-func (mp *moduleParser) Module() *tfconfig.Module {
-	return mp.module
+func (m *module) Module() *tfconfig.Module {
+	return m.module
 }
 
-func (mp *moduleParser) Configuration() *configuration {
-	return mp.cfg
+func (m *module) Configuration() *configuration {
+	return m.cfg
 }

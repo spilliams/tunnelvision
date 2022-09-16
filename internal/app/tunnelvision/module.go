@@ -31,7 +31,7 @@ func newGraphModuleCommand() *cobra.Command {
 			logrus.Infof("reading configuration at %s", rootDir)
 			// logrus.Infof("outputting graph in file %s", outFilename)
 
-			parser := hcl.NewModuleParser(logrus.StandardLogger())
+			parser := hcl.NewModule(logrus.StandardLogger())
 			parser.ParseModuleDirectory(rootDir)
 
 			logrus.Debugf("%#v", parser.Parser())

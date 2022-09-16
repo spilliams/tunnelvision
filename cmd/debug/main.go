@@ -16,7 +16,7 @@ func main() {
 	logrus.Infof("reading configuration at %s", rootDir)
 	// logrus.Infof("outputting graph in file %s", outFilename)
 
-	parser := hcl.NewModuleParser(logrus.StandardLogger())
+	parser := hcl.NewModule(logrus.StandardLogger())
 	if err := parser.ParseModuleDirectory(rootDir); err != nil {
 		logrus.Error(err)
 		os.Exit(1)

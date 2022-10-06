@@ -15,10 +15,12 @@ resource "random_string" "slug" {
 
 module "hex" {
   source = "../../modules/hexadecimal"
+
+  length = random_string.slug.length
 }
 
 data "local_file" "this" {
-  filename = "${path.module}/main.tf"
+  filename = "${path.module}/${local.full_name}/foo.bar"
 }
 
 locals {

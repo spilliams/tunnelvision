@@ -11,11 +11,11 @@ import (
 
 type graph struct {
 	*logrus.Logger
-	f9l *gographviz.Graph
+	fundamental *gographviz.Graph
 }
 
 func (g *graph) String() string {
-	return g.f9l.String()
+	return g.fundamental.String()
 }
 
 func (g *graph) SetLogger(l *logrus.Logger) {
@@ -23,7 +23,7 @@ func (g *graph) SetLogger(l *logrus.Logger) {
 }
 
 func (g *graph) Nodes() []pkg.Node {
-	from := g.f9l.Nodes.Nodes
+	from := g.fundamental.Nodes.Nodes
 	nodes := make([]pkg.Node, len(from))
 	for i := 0; i < len(from); i++ {
 		nodes[i] = &node{from[i]}
@@ -52,7 +52,7 @@ func (g *graph) WalkNodes(f func(pkg.Node) pkg.Node) (int, int) {
 }
 
 func (g *graph) ChildToParents(name string) []string {
-	parents := g.f9l.Relations.ChildToParents[name]
+	parents := g.fundamental.Relations.ChildToParents[name]
 	names := make([]string, 0)
 	for parentName, ok := range parents {
 		if ok {
@@ -71,14 +71,14 @@ func (g *graph) RemoveNode(name string) error {
 		return fmt.Errorf("could not remove node %s: it has multiple parents (%v)", name, parents)
 	}
 	parent := parents[0]
-	if err := g.f9l.RemoveNode(parent, name); err != nil {
+	if err := g.fundamental.RemoveNode(parent, name); err != nil {
 		return fmt.Errorf("could not remove node %s from parent %s: %v", name, parent, err)
 	}
 	return g.checkErr()
 }
 
 func (g *graph) checkErr() error {
-	check := g.f9l.String()
+	check := g.fundamental.String()
 	if strings.HasPrefix(check, "error: ") {
 		return fmt.Errorf(check)
 	}

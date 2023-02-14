@@ -34,7 +34,7 @@ func (r *reader) Read(filename string) (pkg.Graph, error) {
 	if err := gographviz.Analyse(graphAst, g); err != nil {
 		return nil, err
 	}
-	graph := &graph{f9l: g}
+	graph := &graph{fundamental: g}
 	graph.SetLogger(r.Logger)
 	return graph, nil
 }

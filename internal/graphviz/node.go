@@ -9,15 +9,15 @@ import (
 )
 
 type node struct {
-	f9l *gographviz.Node
+	fundamental *gographviz.Node
 }
 
 func (n *node) String() string {
-	return n.f9l.Name
+	return n.fundamental.Name
 }
 
 func (n *node) Attribute(key pkg.AttributeKey) string {
-	val, ok := n.f9l.Attrs[gographviz.Attr(key.String())]
+	val, ok := n.fundamental.Attrs[gographviz.Attr(key.String())]
 	if !ok {
 		return val
 	}
@@ -26,5 +26,5 @@ func (n *node) Attribute(key pkg.AttributeKey) string {
 
 func (n *node) SetAttribute(key pkg.AttributeKey, value string) {
 	strings.Join(strings.Split(value, `"`), `\"`)
-	n.f9l.Attrs.Add(key.String(), fmt.Sprintf(`"%s"`, value))
+	n.fundamental.Attrs.Add(key.String(), fmt.Sprintf(`"%s"`, value))
 }

@@ -22,15 +22,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	logrus.Debugf("parser: %#v", parser.Parser())
-	logrus.Debugf("module: %#v", parser.Module())
-	logrus.Debugf("configuration: %#v", parser.Configuration())
+	// logrus.Debugf("parser: %#v", parser.Parser())
+	// logrus.Debugf("module: %#v", parser.Module())
+	// logrus.Debugf("configuration: %#v", parser.Configuration())
 
 	graph, err := parser.DependencyGraph()
 	if err != nil {
 		logrus.Error(err)
 		os.Exit(1)
 	}
+
 	graphJSON, err := json.MarshalIndent(graph, "", "  ")
 	if err != nil {
 		logrus.Error(err)

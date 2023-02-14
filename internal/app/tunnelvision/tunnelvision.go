@@ -15,6 +15,9 @@ func newRootCmd() *cobra.Command {
 		Short: "visualize and maintain your terraform configurations",
 	}
 
+	cmd.AddCommand(newGraphModuleCommand())
+	cmd.AddCommand(newProviderCommand())
+
 	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "make log output more verbose")
 
 	return cmd

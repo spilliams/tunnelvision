@@ -124,3 +124,29 @@ func TestMappedResourceCoverage(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t, 1.0, percent)
 }
+
+func TestSimpleModuleCoverage(t *testing.T) {
+	// if we apply a root with a module call, it should report correctly
+
+	rootDir := "../../fixtures/examples/simple-module"
+	tfopts := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
+		TerraformDir: rootDir,
+		Logger:       logger.Discard,
+		NoColor:      true,
+	})
+	r, err := NewReport(rootDir)
+	assert.NilError(t, err)
+
+	defer terraform.Destroy(t, tfopts)
+
+	terraform.InitAndApply(t, tfopts)
+
+	// a resource in a list should be tracked properly by the report
+	plan := terraform.InitAndPlanAndShowWithStructNoLogTempPlanFile(t, tfopts)
+	r.AddCoverage(plan.RawPlan)
+
+	percent, uncovered, err := r.Coverage()
+	t.Logf("uncovered resources: %#v", uncovered)
+	assert.NilError(t, err)
+	assert.Equal(t, 1.0, percent)
+}
